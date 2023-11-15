@@ -1,0 +1,58 @@
+# Based on tutorial- https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-3-connecting-using-didcomm-exchange/
+
+1. Connect openVPN using the ZIP file shared by Nils.
+
+2. In putty, connect the IP 82.165.247.238 port 22
+
+3. Use credentials:
+	User:	peak-admin 
+	Password:	mnbLiJ2LqxRUN6MR0ROr
+
+4. For starting an agent
+	Go to folder: ~/aries-cloudagent-python/scripts
+	then run: sudo run_docker start \
+  --label Bob\
+  -it http 0.0.0.0 8001 \
+  -ot http \
+  --admin 0.0.0.0 11001 \
+  --admin-insecure-mode \
+  --genesis-url http://82.165.247.238:9000/genesis \
+  --seed shashank000000000000000000000000\
+  --endpoint http://82.165.247.238:8001 \
+  --debug-connections \
+  --public-invites \
+  --auto-provision \
+  --wallet-type indy \
+  --wallet-name Bob \
+  --wallet-key secret
+
+5. Duplicate the session by clickcing the title bar of Putty. Similarly run Alice agent
+ aca-py start \
+  --label Alice \
+  -it http 0.0.0.0 8000 \
+  -ot http \
+  --admin 0.0.0.0 11000 \
+  --admin-insecure-mode \
+  --genesis-url http://82.165.247.238:9000/genesis \
+  --seed Moritz00000000000000000000000000\
+  --endpoint http://82.165.247.238:8000/ \
+  --debug-connections \
+  --public-invites \
+  --auto-provision \
+  --wallet-type indy \
+  --wallet-name Alice \
+  --wallet-key secret
+
+6. If step 4 and 5 doesn't work, go to 82.165.247.238:9000 and check if you have the did's. Or simply create new ones and replace the seeds here.
+
+7. Currently, on 12 Dec 2022, we have created the agents and trying the coomuncation between them using the following:
+
+Duplicate the session by clickcing the title bar of Putty. 
+curl -X POST "http://82.165.247.238:11000/out-of-band/create-invitation" \
+   -H 'Content-Type: application/json' \
+   -d '{
+  "handshake_protocols": [
+    "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/didexchange/1.0"
+  ],
+  "use_public_did": false
+}'

@@ -1,0 +1,24 @@
+Step 1:
+git clone https://github.com/hyperledger/aries-cloudagent-python
+cd aries-cloudagent-python
+pip3 install -r requirements.txt -r requirements.dev.txt -r requirements.indy.txt
+pip3 install --no-cache-dir -e .
+
+Step 2:
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 68DB5E88
+sudo add-apt-repository "deb https://repo.sovrin.org/sdk/deb bionic master"
+sudo apt-get update
+
+Step 3:
+wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1\~18.04.20_amd64.deb
+sudo dpkg -i libssl1.1_1.1.1-1ubuntu2.1~18.04.20_amd64.deb
+
+Step 4:
+sudo apt-get install -y libindy
+
+Step 5: (Test the installation)
+aca-py --help
+
+Resources:
+Main- https://ldej.nl/post/becoming-a-hyperledger-aries-developer-getting-started/
+Help- https://github.com/dotnet/sdk/issues/24759
