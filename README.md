@@ -17,10 +17,10 @@ Eventually they are all supposed to be connected into a cohesive program.
 
 1. Connect.py -> connects two agents with each other
 2. IssueCredential.py -> Creates DIDs for Agent A and B and Issues a non-Blockchain credential from Agent A to Agent B
-
+3. IssuePersoCert.py -> Issues a persoCert type blockchain VC to an agent with user input of name, address, and date of birth
 ### To-Do / Next Steps
 
-1. Blockchain Credential Issueing
+1. Blockchain Credential Issueing -> other types of Credentials(assetCert, ownerCert, warrantCert)
 2. Presentation of Credential
 3. Revocation of Credential
 4. Creating Agents and Logic Specific to PEAK

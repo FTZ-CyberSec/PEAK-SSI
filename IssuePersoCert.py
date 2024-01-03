@@ -102,11 +102,13 @@ credential_data = create_credential(name, address, dob, id_number)
 # Send the credential proposal
 thread_id, cred_ex_id_holder = send_credential_proposal(credential_data)
 
-# Send credential offer
+# Get issuer cred_ex_id for the credential dance
 cred_ex_id_issuer = requests.get(f"http://82.165.247.238:11000/issue-credential-2.0/records?role=issuer&state=proposal-received&thread_id={thread_id}", data=None)
 cred_ex_id_issuer = cred_ex_id_issuer.json()
 cred_ex_id_issuer = cred_ex_id_issuer['results'][0]['cred_ex_record']['cred_ex_id']
-print(cred_ex_id_issuer)
+# print(cred_ex_id_issuer)
+
+# proposed credential has to be offered, requested, issued and the stored
 send_credential_function(cred_ex_id_issuer, 11000, "offer")
 send_credential_function(cred_ex_id_holder, 11001, "request")
 send_credential_function(cred_ex_id_issuer, 11000, "issue")
