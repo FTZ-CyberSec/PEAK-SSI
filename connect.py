@@ -1,9 +1,8 @@
 import requests
 import json
 
-if __name__ == "__main__":
-    url = "http://82.165.247.238:11000/out-of-band/create-invitation?auto_accept=true&multi_use=true"
-    url2 = 'http://82.165.247.238:11001/out-of-band/receive-invitation?auto_accept=true&use_existing_connection=true'
+
+def connect_agents(url, receive_port, invite_port):
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json"
@@ -22,8 +21,10 @@ if __name__ == "__main__":
         "protocol_version": "1.1",
         "use_public_did": False
     }
+
     # Creates and sends invitation from Alice to Bob
-    response = requests.post(url, headers=headers, json=data)
+    response = requests.post(f"http://{url}:{invite_port}/out-of-band/create-invitation?auto_accept=true&multi_use=true",
+                             headers=headers, json=data)
 
     if response.status_code == 200:
         # Parse the JSON response
@@ -40,10 +41,15 @@ if __name__ == "__main__":
     else:
         print(f"HTTP POST request failed with response code: {response.status_code}")
 
-    # Accepts the Invitation, Connection is established if successful
-    response2 = requests.post(url2, headers=headers, json=invitation)
+    if invitation is not None:
+        # Accepts the Invitation, Connection is established if successful
+        response2 = requests.post(
+            f"http://{url}:{receive_port}/out-of-band/receive-invitation?auto_accept=true&use_existing_connection=true",
+            headers=headers, json=invitation)
 
-    if response2.status_code == 200:
-        print(response2.text)
+        if response2.status_code == 200:
+            print(response2.text)
+        else:
+            print(f"HTTP POST request failed with response code: {response2.status_code}")
     else:
-        print(f"HTTP POST request failed with response code: {response2.status_code}")
+        print("No invitation available to accept.")
