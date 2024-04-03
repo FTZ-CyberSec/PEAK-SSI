@@ -20,9 +20,6 @@ def create_vc(type, holder_port=11002):
                 "schema_name": "persoCert",
                 "schema_version": "1.0"
             }
-            # used for the ld_proof and as second part of the type
-            name = "persoCert"
-
         case "ownerCert":
             attributes = [{"name": "lizenznummer", "value": f"{random.randint(0, 100000)}"}]
             issuer = platform_DID
@@ -34,7 +31,6 @@ def create_vc(type, holder_port=11002):
                 "schema_name": "ownerCert",
                 "schema_version": "1.0"
             }
-            name = "ownerCert"
         case "gridCert":
             id = random.randint(0, 10000)
             dot = "."
@@ -54,7 +50,6 @@ def create_vc(type, holder_port=11002):
                 "schema_name": "gridCert",
                 "schema_version": "1.0"
             }
-            name = "gridCert"
         case "assetCert":
             attributes = [{"name": "anlagenTyp", "value": f"{random.choice(['PV', 'Wind', 'Biomasse', 'Speicher', 'Wärmepumpe', 'Elektroauto'])}"},
             {"name": "stellschritteP", "value": f"{random.randint(1, 20)*10}"},
@@ -72,19 +67,24 @@ def create_vc(type, holder_port=11002):
                 "schema_name": "assetCert",
                 "schema_version": "1.0"
             }
-            name = "assetCert"
         case "warrantCert":
-            {"name": "ownerID", "value": f"de{id}"},
-            {"name": "energyAgentID", "value": f"ea{id}"},
-            {"name": "gridID", "value": f"p21033h{id}"},
-            {"name": "maxProd", "value": f"{random.randint(1000, 10000)}"},
-            {"name": "tradeDirection", "value": "all"},
-            {"name": "assetIDs", "value": "PV1, PV2, PV3"},
-            {"name": "storageCapacity", "value": f"{random.randint(7000, 20000)}"}
+            attributes = [{"name": "handelsRichtung", "value": f"{random.choice(['Einkauf', 'Verkauf', 'Beides'])}"},
+            {"name": "maxEinspeisung", "value": f"{random.randint(1000, 10000)}"},
+            {"name": "maxLast", "value": f"{random.randint(1000, 10000)}"},
+            {"name": "handelsArt", "value": f"{random.choice(['Flex', 'Energie', 'Beides'])}"}]
             issuer = platform_DID
+            indy = {
+                "cred_def_id": f"{issuer}:3:CL:36:default",
+                "issuer_did": issuer,
+                "schema_id": f"{issuer}:2:warrantCert:1.0",
+                "schema_issuer_did": issuer,
+                "schema_name": "warrantCert",
+                "schema_version": "1.0"
+            }
         case _:
             print("Invalid type")
             return
+    name = type
     # Important for fetching the right connection_id
     if issuer == platform_DID:
         which = "Platform"
