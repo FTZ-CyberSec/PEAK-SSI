@@ -1,6 +1,6 @@
 from connect import connect_agents
 from config import vc_types
-from getVC import perform_credential_exchange, define_credential
+from exchangeVC import perform_credential_exchange, define_credential
 
 # Run on first startup of SSI Network
 """
