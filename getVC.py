@@ -3,59 +3,27 @@ import json
 import random
 import datetime
 import time
+from createVC import create_vc
 
 BASE_URL = 'http://82.165.247.238'
 
 
 # Function to perform the credential exchange
-def perform_credential_exchange(holder_port, issuer_port=11000):
+def perform_credential_exchange(type, holder_port=11002):
     id = random.randint(00000, 99999)
+    match type:
+        case "persoCert":
+            issuer_port = 11000
+        case "ownerCert":
+            issuer_port = 11000
+        case "gridCert":
+            issuer_port = 11001
+        case "assetCert":
+            issuer_port = 11001
+        case "warrantCert":
+            issuer_port = 11000
     # Define the data for the credential proposal
-    credential_proposal_data = {
-        "auto_remove": False,
-        "comment": "Please give me permission to trade",
-        "connection_id": requests.get(f'{BASE_URL}:{holder_port}/connections').json()['results'][0].get(
-            'connection_id'),
-        "credential_preview": {
-            "@type": "issue-credential/2.0/credential-preview",
-            # TODO: Add a list of attribute sets and find a way to input values
-            "attributes": [
-                {"name": "ownerID", "value": f"de{id}"},
-                {"name": "energyAgentID", "value": f"ea{id}"},
-                {"name": "gridID", "value": f"p21033h{id}"},
-                {"name": "maxProd", "value": f"{random.randint(1000, 10000)}"},
-                {"name": "tradeDirection", "value": "all"},
-                {"name": "assetIDs", "value": "PV1, PV2, PV3"},
-                {"name": "storageCapacity", "value": f"{random.randint(7000, 20000)}"}
-            ]
-        },
-        # TODO: Add a list of schemas to choose from
-        "filter": {
-            "indy": {
-                "cred_def_id": "X8THiyo3G9EDYcNfg4aM2f:3:CL:12:authProsumers",
-                "issuer_did": "X8THiyo3G9EDYcNfg4aM2f",
-                "schema_id": "X8THiyo3G9EDYcNfg4aM2f:2:tradeAuth:1.0",
-                "schema_issuer_did": "X8THiyo3G9EDYcNfg4aM2f",
-                "schema_name": "tradeAuth",
-                "schema_version": "1.0"
-            },
-            "ld_proof": {
-                "credential": {
-                    "@context": [
-                        "https://www.w3.org/2018/credentials/v1",
-                        "https://www.w3.org/2018/credentials/examples/v1"
-                    ],
-                    "credentialSubject": {"type": ["Person", "Prosumer"]},
-                    "issuanceDate": f"{datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}",
-                    "issuer": "did:sov:X8THiyo3G9EDYcNfg4aM2f",
-                    "name": "P2P Trading Licence",
-                    "type": ["VerifiableCredential", "P2PTradingLicence"],
-                },
-                "options": {"proofType": "Ed25519Signature2018"}
-            }
-        },
-        "trace": True
-    }
+    credential_proposal_data = create_vc(type, holder_port)
 
     # Send Credential Proposal
     response = requests.post(f'{BASE_URL}:{holder_port}/issue-credential-2.0/send-proposal',
@@ -66,7 +34,7 @@ def perform_credential_exchange(holder_port, issuer_port=11000):
     print("Credential Proposal Response:")
     print(response.json())
     print("\n")
-
+    time.sleep(0.1)
     thread_id = response.json()["thread_id"]
     print(thread_id)
     cred_ex_id_holder = response.json()["cred_ex_id"]
@@ -167,7 +135,7 @@ def perform_credential_exchange(holder_port, issuer_port=11000):
         store_credential_response = requests.post(
             f'{BASE_URL}:{holder_port}/issue-credential-2.0/records/{cred_ex_id_holder}/store',
             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
-            data=json.dumps({"credential_id": "tradeAuth"}))
+            data=json.dumps({"credential_id": type}))
         # Check if the response was successful (status code 200)
         if store_credential_response.status_code == 200:
             # Process the successful response here
@@ -200,6 +168,3 @@ def perform_credential_exchange(holder_port, issuer_port=11000):
         # Handle requests exceptions (e.g., network errors, timeouts)
         print(f"Request failed: {e}")
 
-
-# Example usage
-perform_credential_exchange(11009)

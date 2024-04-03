@@ -1,7 +1,9 @@
 import random
-from config import platform_DID, grid_DID
+import requests
+import datetime
+from config import platform_DID, grid_DID, BASE_URL
 
-def create_vc(type):
+def create_vc(type, holder_port=11002):
     # Define the data for the credential proposal
     match type:
         case "persoCert":
@@ -22,29 +24,55 @@ def create_vc(type):
             name = "persoCert"
 
         case "ownerCert":
-            {"name": "ownerID", "value": f"de{id}"},
-            {"name": "energyAgentID", "value": f"ea{id}"},
-            {"name": "gridID", "value": f"p21033h{id}"},
-            {"name": "maxProd", "value": f"{random.randint(1000, 10000)}"},
-            {"name": "tradeDirection", "value": "all"},
-            {"name": "assetIDs", "value": "PV1, PV2, PV3"},
-            {"name": "storageCapacity", "value": f"{random.randint(7000, 20000)}"}
+            attributes = [{"name": "lizenznummer", "value": f"{random.randint(0, 100000)}"}]
+            issuer = platform_DID
+            indy = {
+                "cred_def_id": f"{issuer}:3:CL:30:default",
+                "issuer_did": issuer,
+                "schema_id": f"{issuer}:2:ownerCert:1.0",
+                "schema_issuer_did": issuer,
+                "schema_name": "ownerCert",
+                "schema_version": "1.0"
+            }
+            name = "ownerCert"
         case "gridCert":
-            {"name": "ownerID", "value": f"de{id}"},
-            {"name": "energyAgentID", "value": f"ea{id}"},
-            {"name": "gridID", "value": f"p21033h{id}"},
-            {"name": "maxProd", "value": f"{random.randint(1000, 10000)}"},
-            {"name": "tradeDirection", "value": "all"},
-            {"name": "assetIDs", "value": "PV1, PV2, PV3"},
-            {"name": "storageCapacity", "value": f"{random.randint(7000, 20000)}"}
+            id = random.randint(0, 10000)
+            dot = "."
+            attributes = [
+            {"name": "zaehlerID", "value": f"de{id}"},
+            {"name": "smartMeterID", "value": f"ea{id}"},
+            {"name": "marktlokation", "value": f"p21033h{id}"},
+            {"name": "HEMS", "value": f"'id': '{random.randint(0, 10000)}', 'adresse': '{dot.join(map(str, (random.randint(0, 255) for _ in range(4))))}', 'typ': 'HEMS'"},
+            {"name": "steuerbox", "value": f"'id': '{random.randint(0, 10000)}', 'adresse': '{dot.join(map(str, (random.randint(0, 255) for _ in range(4))))}', 'typ': 'Steuerbox'"},
+            {"name": "verbrauchpA", "value": f"{random.randint(2000, 9000)}"}]
+            issuer = grid_DID
+            indy = {
+                "cred_def_id": f"{issuer}:3:CL:18:default",
+                "issuer_did": issuer,
+                "schema_id": f"{issuer}:2:gridCert:1.0",
+                "schema_issuer_did": issuer,
+                "schema_name": "gridCert",
+                "schema_version": "1.0"
+            }
+            name = "gridCert"
         case "assetCert":
-            {"name": "ownerID", "value": f"de{id}"},
-            {"name": "energyAgentID", "value": f"ea{id}"},
-            {"name": "gridID", "value": f"p21033h{id}"},
-            {"name": "maxProd", "value": f"{random.randint(1000, 10000)}"},
-            {"name": "tradeDirection", "value": "all"},
-            {"name": "assetIDs", "value": "PV1, PV2, PV3"},
-            {"name": "storageCapacity", "value": f"{random.randint(7000, 20000)}"}
+            attributes = [{"name": "anlagenTyp", "value": f"{random.choice(['PV', 'Wind', 'Biomasse', 'Speicher', 'Wärmepumpe', 'Elektroauto'])}"},
+            {"name": "stellschritteP", "value": f"{random.randint(1, 20)*10}"},
+            {"name": "Pmax", "value": f"{random.randint(1000, 20000)}"},
+            {"name": "Pmin", "value": f"{random.randint(10, 1000)}"},
+            {"name": "energieArt", "value": f"{random.choice(['Strom', 'Wärme', 'Gas'])}"},
+            {"name": "steuerbarkeit", "value": f"{random.choice(['ja', 'nein'])}"},
+            {"name": "speicherKapa", "value": f"{random.choice([0,random.randint(4000, 16000)])}"}]
+            issuer = grid_DID
+            indy = {
+                "cred_def_id": f"{issuer}:3:CL:24:default",
+                "issuer_did": issuer,
+                "schema_id": f"{issuer}:2:assetCert:1.0",
+                "schema_issuer_did": issuer,
+                "schema_name": "assetCert",
+                "schema_version": "1.0"
+            }
+            name = "assetCert"
         case "warrantCert":
             {"name": "ownerID", "value": f"de{id}"},
             {"name": "energyAgentID", "value": f"ea{id}"},
@@ -53,28 +81,27 @@ def create_vc(type):
             {"name": "tradeDirection", "value": "all"},
             {"name": "assetIDs", "value": "PV1, PV2, PV3"},
             {"name": "storageCapacity", "value": f"{random.randint(7000, 20000)}"}
+            issuer = platform_DID
         case _:
             print("Invalid type")
-    """credential_proposal_data = {
+            return
+    # Important for fetching the right connection_id
+    if issuer == platform_DID:
+        which = "Platform"
+    elif issuer == grid_DID:
+        which = "Grid"
+    # Inserts the generated data into the credential proposal
+    credential_proposal_data = {
         "auto_remove": False,
         "comment": "Please give me permission to trade",
-        "connection_id": requests.get(f'{BASE_URL}:{holder_port}/connections').json()['results'][0].get(
+        "connection_id": requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_label={which} Connection').json()['results'][0].get(
             'connection_id'),
         "credential_preview": {
             "@type": "issue-credential/2.0/credential-preview",
-            # TODO: Add a list of attribute sets and find a way to input values
             "attributes": attributes
         },
-        # TODO: Add a list of schemas to choose from
         "filter": {
-            "indy": {
-                "cred_def_id": "X8THiyo3G9EDYcNfg4aM2f:3:CL:12:authProsumers",
-                "issuer_did": "X8THiyo3G9EDYcNfg4aM2f",
-                "schema_id": "X8THiyo3G9EDYcNfg4aM2f:2:tradeAuth:1.0",
-                "schema_issuer_did": "X8THiyo3G9EDYcNfg4aM2f",
-                "schema_name": "tradeAuth",
-                "schema_version": "1.0"
-            },
+            "indy": indy,
             "ld_proof": {
                 "credential": {
                     "@context": [
@@ -83,13 +110,13 @@ def create_vc(type):
                     ],
                     "credentialSubject": {"type": ["Person", "Prosumer"]},
                     "issuanceDate": f"{datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}",
-                    "issuer": "did:sov:X8THiyo3G9EDYcNfg4aM2f",
-                    "name": "P2P Trading Licence",
-                    "type": ["VerifiableCredential", "P2PTradingLicence"],
+                    "issuer": f"did:sov:{issuer}",
+                    "name": name,
+                    "type": ["VerifiableCredential", name],
                 },
                 "options": {"proofType": "Ed25519Signature2018"}
             }
         },
         "trace": True
-    }"""
-    return attributes, indy, issuer, name
+    }
+    return credential_proposal_data

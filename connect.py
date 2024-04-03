@@ -2,12 +2,17 @@ import requests
 import json
 
 
-def connect_agents(url, receive_port, invite_port):
+def connect_agents(url, receive_port, target):
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json"
     }
-
+    if target == "platform":
+        invite_port = 11000
+        label = "Platform Connection"
+    elif target == "grid":
+        invite_port = 11001
+        label = "Grid Connection"
     data = {
         "accept": [
             "didcomm/aip1",
@@ -17,7 +22,7 @@ def connect_agents(url, receive_port, invite_port):
             "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/didexchange/1.0"
         ],
         "metadata": {},
-        "my_label": "Invitation to Bob",
+        "my_label": label,
         "protocol_version": "1.1",
         "use_public_did": False
     }
