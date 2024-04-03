@@ -4,8 +4,7 @@ import random
 import datetime
 import time
 from createVC import create_vc
-
-BASE_URL = 'http://82.165.247.238'
+from config import BASE_URL
 
 
 # Function to perform the credential exchange
@@ -26,7 +25,7 @@ def perform_credential_exchange(type, holder_port=11002):
     credential_proposal_data = create_vc(type, holder_port)
 
     # Send Credential Proposal
-    response = requests.post(f'{BASE_URL}:{holder_port}/issue-credential-2.0/send-proposal',
+    response = requests.post(f'http://{BASE_URL}:{holder_port}/issue-credential-2.0/send-proposal',
                              headers={'accept': 'application/json', 'Content-Type': 'application/json'},
                              data=json.dumps(credential_proposal_data))
 
@@ -47,7 +46,7 @@ def perform_credential_exchange(type, holder_port=11002):
             'thread_id': thread_id
         }
         fetch_record_response = requests.get(
-            f"{BASE_URL}:{issuer_port}/issue-credential-2.0/records",
+            f"http://{BASE_URL}:{issuer_port}/issue-credential-2.0/records",
             headers={'accept': 'application/json'}, params=params)
 
         # Check if the response was successful (status code 200)
@@ -72,7 +71,7 @@ def perform_credential_exchange(type, holder_port=11002):
     # Send Offer from Issuer
     try:
         offer_response = requests.post(
-            f'{BASE_URL}:{issuer_port}/issue-credential-2.0/records/{cred_ex_id_issuer}/send-offer',
+            f'http://{BASE_URL}:{issuer_port}/issue-credential-2.0/records/{cred_ex_id_issuer}/send-offer',
             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
             data=json.dumps({}))
         # Check if the response was successful (status code 200)
@@ -93,7 +92,7 @@ def perform_credential_exchange(type, holder_port=11002):
     # Request Credential from Holder
     try:
         request_credential_response = requests.post(
-            f'{BASE_URL}:{holder_port}/issue-credential-2.0/records/{cred_ex_id_holder}/send-request',
+            f'http://{BASE_URL}:{holder_port}/issue-credential-2.0/records/{cred_ex_id_holder}/send-request',
             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
             data=json.dumps({}))
         # Check if the response was successful (status code 200)
@@ -113,7 +112,7 @@ def perform_credential_exchange(type, holder_port=11002):
     # Issue Credential
     try:
         issue_credential_response = requests.post(
-            f'{BASE_URL}:{issuer_port}/issue-credential-2.0/records/{cred_ex_id_issuer}/issue',
+            f'http://{BASE_URL}:{issuer_port}/issue-credential-2.0/records/{cred_ex_id_issuer}/issue',
             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
             data=json.dumps({"comment": "there you go"}))
         # Check if the response was successful (status code 200)
@@ -133,7 +132,7 @@ def perform_credential_exchange(type, holder_port=11002):
     # Store Credential
     try:
         store_credential_response = requests.post(
-            f'{BASE_URL}:{holder_port}/issue-credential-2.0/records/{cred_ex_id_holder}/store',
+            f'http://{BASE_URL}:{holder_port}/issue-credential-2.0/records/{cred_ex_id_holder}/store',
             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
             data=json.dumps({"credential_id": type}))
         # Check if the response was successful (status code 200)
