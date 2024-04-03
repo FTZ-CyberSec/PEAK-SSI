@@ -167,3 +167,58 @@ def perform_credential_exchange(type, holder_port=11002):
         # Handle requests exceptions (e.g., network errors, timeouts)
         print(f"Request failed: {e}")
 
+def define_credential(type):
+    match type:
+        case "persoCert":
+            issuer_port = 11000
+            attributes = ["name", "adress", "birthdate"]
+        case "ownerCert":
+            issuer_port = 11000
+            attributes = ["lizenznummer"]
+        case "gridCert":
+            issuer_port = 11001
+            attributes = ["zaehlerID", "smartMeterID", "marktlokation", "HEMS", "steuerbox", "verbrauchpA"]
+        case "assetCert":
+            issuer_port = 11001
+            attributes = ["anlagenTyp", "stellschritteP", "Pmax", "Pmin", "energieArt", "steuerbarkeit", "speicherKapa"]
+        case "warrantCert":
+            issuer_port = 11000
+            attributes = ["handelsRichtung", "maxEinspeisung", "maxLast", "handelsArt"]
+    name = type
+
+    # Create Schema
+    schema_data = {
+        "attributes": attributes,
+        "schema_name": name,
+        "schema_version": "1.0"
+    }
+    response = requests.post(f'http://{BASE_URL}:{issuer_port}/schemas',
+                             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
+                             data=json.dumps(schema_data))
+    print(response.json())
+    print("\n")
+    # Extract the value seqNo from the response
+    seqNo = response.json()["sent"]["schema"]["seqNo"]
+    time.sleep(0.1)
+    # Create Credential Definition
+    credential_definition_data = {
+        "revocation_registry_size": 10000,
+        "schema_id": f"{BASE_URL}:2:{name}:1.0",
+        "support_revocation": True,
+        "tag": "default"
+    }
+    response = requests.post(f'http://{BASE_URL}:{issuer_port}/credential-definitions',
+                             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
+                             data=json.dumps(credential_definition_data))
+    print(response.json())
+    print("\n")
+    time.sleep(0.1)
+    # Create Revocation Registry
+    revocation_registry_data = {
+        "credential_definition_id": f"{BASE_URL}:3:CL:{seqNo}:default",
+        "max_cred_num": 10000
+    }
+    response = requests.post(f'http://{BASE_URL}:{issuer_port}/revocation/create-registry',
+                             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
+                             data=json.dumps(revocation_registry_data))
+    print(response.json())
