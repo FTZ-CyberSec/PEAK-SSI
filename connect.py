@@ -1,8 +1,8 @@
 import requests
 import json
+from config import BASE_URL as url
 
-
-def connect_agents(url, receive_port, target):
+def connect_agents(receive_port, target):
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json"
