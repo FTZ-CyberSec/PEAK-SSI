@@ -15,10 +15,10 @@ Eventually they are all supposed to be connected into a cohesive program.
 
 ### List of Scripts:
 
-1. connect.py -> connects two agents with each other
-2. exchangeVC.py -> includes functions to define, issue and present the defined VCs
-3. createVC.py -> helper functions to create VCs
-4. config.py -> configuration file for the project, where the server url and ports are defined
+1. connect.py &rarr; connects two agents with each other
+2. exchangeVC.py &rarr; includes functions to define, issue and present the defined VCs
+3. createVC.py &rarr; helper functions to create VCs
+4. config.py &rarr; configuration file for the project, where the server url and ports are defined
 
 ### To-Do / Next Steps
 
