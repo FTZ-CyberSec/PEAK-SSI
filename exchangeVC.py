@@ -167,6 +167,177 @@ def perform_credential_exchange(type, holder_port=11002):
         # Handle requests exceptions (e.g., network errors, timeouts)
         print(f"Request failed: {e}")
 
+def present_credential(type, holder_port=11002):
+    match type:
+        case "persoCert":
+            issuer_port = 11000
+            which = "Platform"
+            vc = ["name", "adress", "birthdate"]
+        case "ownerCert":
+            issuer_port = 11000
+            which = "Platform"
+            vc = ["lizenznummer"]
+        case "gridCert":
+            issuer_port = 11001
+            which = "Grid"
+            vc = ["zaehlerID", "smartMeterID", "marktlokation", "HEMS", "steuerbox", "verbrauchpA"]
+        case "assetCert":
+            issuer_port = 11001
+            which = "Grid"
+            vc = ["anlagenTyp", "stellschritteP", "Pmax", "Pmin", "energieArt", "steuerbarkeit", "speicherKapa"]
+        case "warrantCert":
+            issuer_port = 11000
+            which = "Platform"
+            vc = ["handelsRichtung", "maxEinspeisung", "maxLast", "handelsArt"]
+    attributes = {}
+    current_timestamp = int(datetime.datetime.now().timestamp())
+    for attribute in vc:
+        attributes[attribute] = {"name": attribute, "non_revoked": {"to": current_timestamp}}
+    # Fetch the connection ID of the verifier agent
+    invitation_key = requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_label={which} Connection').json()['results'][0].get(
+        'invitation_key')
+    params = {
+        'invitation_key': invitation_key,
+        'state': 'active'
+    }
+    verifier_connection_id = \
+        requests.get(f"http://{BASE_URL}:{issuer_port}/connections", params=params).json()['results'][0]['connection_id']
+    url = f'http://{BASE_URL}:{issuer_port}/present-proof-2.0/send-request'
+    headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    payload = {
+        "auto_verify": False,
+        "auto_remove": False,
+        "comment": "please confirm",
+        "connection_id": verifier_connection_id,
+        "presentation_request": {
+            "indy": {
+                "name": "Proof request",
+                "non_revoked": {
+                    "to": current_timestamp
+                },
+                "nonce": "1",
+                "requested_attributes": attributes,
+                "requested_predicates": {},
+                "version": "1.0"
+            }
+        },
+        "trace": False
+    }
+    print(payload)
+    # Sending POST request to ACA-Py
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    if response.status_code != 200:
+        print("Failed to send presentation request.")
+        print(f"Status Code: {response.status_code}, Response: {response.text}")
+        return None
+
+    thread_id = response.json()["thread_id"]
+    pres_ex_id_issuer = response.json()["pres_ex_id"]
+    # print(thread_id)
+    # print(pres_ex_id_issuer)
+
+    # Fetch the presentation record on the verifier agent
+    time.sleep(0.1)
+    try:
+        # Make the GET request
+        params = {
+            'thread_id': thread_id
+        }
+        fetch_record_response = requests.get(
+            f"http://{BASE_URL}:{holder_port}/present-proof-2.0/records",
+            headers={'accept': 'application/json'}, params=params)
+
+        # Check if the response was successful (status code 200)
+        if fetch_record_response.status_code != 200:
+            # Handle responses with error status codes
+            print(f"Error fetching presentation record: {fetch_record_response.status_code}")
+            print(fetch_record_response.text)
+    except requests.exceptions.RequestException as e:
+        # Handle requests exceptions (e.g., network errors, timeouts)
+        print(f"Request failed: {e}")
+
+    if fetch_record_response.json()['results']:
+        pres_ex_id_holder = fetch_record_response.json()['results'][0]['pres_ex_id']
+    else:
+        return "No credential exchange record found"
+
+    print(pres_ex_id_holder)
+
+    # Fetch the credentials that fit the request on the holder agent
+    try:
+        # Make the GET request
+        fetch_record_response = requests.get(
+            f"http://{BASE_URL}:{holder_port}/present-proof-2.0/records/{pres_ex_id_holder}/credentials",
+            headers={'accept': 'application/json'})
+
+        # Check if the response was successful (status code 200)
+        if fetch_record_response.status_code != 200:
+            # Handle responses with error status codes
+            print(f"Error fetching credentials: {fetch_record_response.status_code}")
+            print(fetch_record_response.text)
+
+    except requests.exceptions.RequestException as e:
+        # Handle requests exceptions (e.g., network errors, timeouts)
+        print(f"Request failed: {e}")
+    # Build Presentation attributes
+    req_attributes = {}
+    for attribute in vc:
+        req_attributes[attribute] = {'cred_id': type, 'revealed': True}
+    print(req_attributes)
+    time.sleep(0.1)
+    # Create Presentation from Holder
+    presentation_data = {
+        "indy": {
+            "requested_attributes": req_attributes,
+            "requested_predicates": {
+            },
+            "self_attested_attributes": {
+            },
+            "trace": False
+        },
+        "trace": True
+    }
+    print(presentation_data)
+    # Send Presentation from Holder
+    try:
+        presentation_response = requests.post(
+            f'http://{BASE_URL}:{holder_port}/present-proof-2.0/records/{pres_ex_id_holder}/send-presentation',
+            headers={'accept': 'application/json', 'Content-Type': 'application/json'},
+            data=json.dumps(presentation_data))
+        # Check if the response was successful (status code 200)
+        if presentation_response.status_code != 200:
+            # Handle responses with error status codes
+            print(f"Error sending presentation: {presentation_response.status_code}")
+            print(presentation_response.text)
+    except requests.exceptions.RequestException as e:
+        # Handle requests exceptions (e.g., network errors, timeouts)
+        print(f"Request failed: {e}")
+
+    time.sleep(0.1)
+    # Verify Presentation
+    try:
+        verify_response = requests.post(
+            f'http://{BASE_URL}:11000/present-proof-2.0/records/{pres_ex_id_issuer}/verify-presentation',
+            headers={'accept': 'application/json', 'Content-Type': 'application/json'},
+            data=json.dumps({}))
+        # Check if the response was successful (status code 200)
+        if verify_response.status_code == 200:
+            # Process the successful response here
+            print("Verify Presentation Response:")
+            print(verify_response.json())
+            print("\n")
+            # return verify_response.json()
+        else:
+            # Handle responses with error status codes
+            print(f"Error verifying presentation: {verify_response.status_code}")
+            print(verify_response.text)
+    except requests.exceptions.RequestException as e:
+        # Handle requests exceptions (e.g., network errors, timeouts)
+        print(f"Request failed: {e}")
+
 def define_credential(type):
     match type:
         case "persoCert":
