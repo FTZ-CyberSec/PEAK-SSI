@@ -1,6 +1,6 @@
 from connect import connect_agents
-from config import vc_types
-from exchangeVC import perform_credential_exchange, define_credential, present_credential
+from config import *
+from exchangeVC import *
 
 # Run on first startup of SSI Network
 """
@@ -9,3 +9,5 @@ for type in vc_types:
 """
 
 present_credential("persoCert")
+perform_credential_exchange("ownerCert")
+present_credential("ownerCert")

@@ -226,7 +226,6 @@ def present_credential(type, holder_port=11002):
         },
         "trace": False
     }
-    print(payload)
     # Sending POST request to ACA-Py
     response = requests.post(url, headers=headers, data=json.dumps(payload))
     if response.status_code != 200:
@@ -264,7 +263,7 @@ def present_credential(type, holder_port=11002):
     else:
         return "No credential exchange record found"
 
-    print(pres_ex_id_holder)
+    # print(pres_ex_id_holder)
 
     # Fetch the credentials that fit the request on the holder agent
     try:
@@ -286,7 +285,6 @@ def present_credential(type, holder_port=11002):
     req_attributes = {}
     for attribute in vc:
         req_attributes[attribute] = {'cred_id': type, 'revealed': True}
-    print(req_attributes)
     time.sleep(0.1)
     # Create Presentation from Holder
     presentation_data = {
@@ -300,7 +298,6 @@ def present_credential(type, holder_port=11002):
         },
         "trace": True
     }
-    print(presentation_data)
     # Send Presentation from Holder
     try:
         presentation_response = requests.post(
