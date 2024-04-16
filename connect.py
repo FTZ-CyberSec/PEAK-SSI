@@ -9,22 +9,23 @@ def connect_agents(receive_port, target):
     }
     if target == "platform":
         invite_port = 11000
-        label = "Platform Connection"
+        label = "Platform"
     elif target == "grid":
         invite_port = 11001
-        label = "Grid Connection"
+        label = "Grid"
     data = {
         "accept": [
             "didcomm/aip1",
             "didcomm/aip2;env=rfc19"
         ],
+        "alias": label,
         "handshake_protocols": [
             "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/didexchange/1.0"
         ],
         "metadata": {},
-        "my_label": label,
+        "my_label": "test1",
         "protocol_version": "1.1",
-        "use_public_did": False
+        "use_public_did": True
     }
 
     # Creates and sends invitation from Alice to Bob

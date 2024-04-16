@@ -38,8 +38,8 @@ def create_vc(type, holder_port=11002):
             {"name": "zaehlerID", "value": f"de{id}"},
             {"name": "smartMeterID", "value": f"ea{id}"},
             {"name": "marktlokation", "value": f"p21033h{id}"},
-            {"name": "HEMS", "value": f"'id': '{random.randint(0, 10000)}', 'adresse': '{dot.join(map(str, (random.randint(0, 255) for _ in range(4))))}', 'typ': 'HEMS'"},
-            {"name": "steuerbox", "value": f"'id': '{random.randint(0, 10000)}', 'adresse': '{dot.join(map(str, (random.randint(0, 255) for _ in range(4))))}', 'typ': 'Steuerbox'"},
+            {"name": "HEMS", "value": str(dict(id = random.randint(0, 10000), adresse = dot.join(map(str, (random.randint(0, 255) for _ in range(4)))), typ = 'HEMS'))},
+            {"name": "steuerbox", "value": str(dict(id = random.randint(0, 10000), adresse = dot.join(map(str, (random.randint(0, 255) for _ in range(4)))), typ = 'Steuerbox'))},
             {"name": "verbrauchpA", "value": f"{random.randint(2000, 9000)}"}]
             issuer = grid_DID
             indy = {
@@ -87,14 +87,14 @@ def create_vc(type, holder_port=11002):
     name = type
     # Important for fetching the right connection_id
     if issuer == platform_DID:
-        which = "Platform"
+        which = platform_DID
     elif issuer == grid_DID:
-        which = "Grid"
+        which = grid_DID
     # Inserts the generated data into the credential proposal
     credential_proposal_data = {
         "auto_remove": False,
         "comment": "Please give me permission to trade",
-        "connection_id": requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_label={which} Connection').json()['results'][0].get(
+        "connection_id": requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_public_did={which}').json()['results'][0].get(
             'connection_id'),
         "credential_preview": {
             "@type": "issue-credential/2.0/credential-preview",

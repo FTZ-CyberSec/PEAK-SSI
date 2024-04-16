@@ -4,11 +4,11 @@ import random
 import datetime
 import time
 from createVC import create_vc
-from config import BASE_URL
+from config import BASE_URL, platform_DID, grid_DID
 
 
 # Function to perform the credential exchange
-def perform_credential_exchange(type, holder_port=11002):
+def issue_credential(type, holder_port=11002):
     id = random.randint(00000, 99999)
     match type:
         case "persoCert":
@@ -171,35 +171,36 @@ def present_credential(type, holder_port=11002):
     match type:
         case "persoCert":
             issuer_port = 11000
-            which = "Platform"
+            which = platform_DID
             vc = ["name", "adress", "birthdate"]
         case "ownerCert":
             issuer_port = 11000
-            which = "Platform"
+            which = platform_DID
             vc = ["lizenznummer"]
         case "gridCert":
             issuer_port = 11001
-            which = "Grid"
+            which = grid_DID
             vc = ["zaehlerID", "smartMeterID", "marktlokation", "HEMS", "steuerbox", "verbrauchpA"]
         case "assetCert":
             issuer_port = 11001
-            which = "Grid"
+            which = grid_DID
             vc = ["anlagenTyp", "stellschritteP", "Pmax", "Pmin", "energieArt", "steuerbarkeit", "speicherKapa"]
         case "warrantCert":
             issuer_port = 11000
-            which = "Platform"
+            which = platform_DID
             vc = ["handelsRichtung", "maxEinspeisung", "maxLast", "handelsArt"]
     attributes = {}
     current_timestamp = int(datetime.datetime.now().timestamp())
     for attribute in vc:
         attributes[attribute] = {"name": attribute, "non_revoked": {"to": current_timestamp}}
     # Fetch the connection ID of the verifier agent
-    invitation_key = requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_label={which} Connection').json()['results'][0].get(
+    invitation_key = requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_public_did={which}').json()['results'][0].get(
         'invitation_key')
     params = {
         'invitation_key': invitation_key,
         'state': 'active'
     }
+    time.sleep(0.1)
     verifier_connection_id = \
         requests.get(f"http://{BASE_URL}:{issuer_port}/connections", params=params).json()['results'][0]['connection_id']
     url = f'http://{BASE_URL}:{issuer_port}/present-proof-2.0/send-request'
@@ -317,7 +318,7 @@ def present_credential(type, holder_port=11002):
     # Verify Presentation
     try:
         verify_response = requests.post(
-            f'http://{BASE_URL}:11000/present-proof-2.0/records/{pres_ex_id_issuer}/verify-presentation',
+            f'http://{BASE_URL}:{issuer_port}/present-proof-2.0/records/{pres_ex_id_issuer}/verify-presentation',
             headers={'accept': 'application/json', 'Content-Type': 'application/json'},
             data=json.dumps({}))
         # Check if the response was successful (status code 200)
@@ -326,7 +327,7 @@ def present_credential(type, holder_port=11002):
             print("Verify Presentation Response:")
             print(verify_response.json())
             print("\n")
-            # return verify_response.json()
+            return verify_response.json()
         else:
             # Handle responses with error status codes
             print(f"Error verifying presentation: {verify_response.status_code}")
