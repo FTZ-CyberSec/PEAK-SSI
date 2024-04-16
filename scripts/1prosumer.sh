@@ -1,0 +1,16 @@
+ aca-py start \
+  --label Prosumer_Agent_1 \
+  -it http 0.0.0.0 8002 \
+  -ot http \
+  --admin 0.0.0.0 11002 \
+  --admin-insecure-mode \
+  --genesis-url http://82.165.247.238:9000/genesis \
+  --seed Prosumer000000000000000000000001 \
+  --endpoint http://localhost:8002/ \
+  --debug-connections \
+  --public-invites \
+  --auto-provision \
+  --wallet-type askar \
+  --wallet-name Prosumer_Agent_1 \
+  --wallet-key secret \
+  --tails-server-base-url http://localhost:6543/

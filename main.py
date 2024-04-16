@@ -39,6 +39,11 @@ if True:
     if presentation1['verified'] == 'true':
         print("gridCert is verified, here is the data: \n")
         print("ZaehlerID: ", presentation1['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['zaehlerID']['raw'])
+        print("SmartMeterID: ", presentation1['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['smartMeterID']['raw'])
+        print("Marktlokation: ", presentation1['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['marktlokation']['raw'])
+        print("HEMS: ", presentation1['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['HEMS']['raw'])
+        print("Steuerbox: ", presentation1['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['steuerbox']['raw'])
+        print("VerbrauchpA: ", presentation1['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['verbrauchpA']['raw'] + "kWh")
     else:
         print("gridCert could not be verified")
 else:
