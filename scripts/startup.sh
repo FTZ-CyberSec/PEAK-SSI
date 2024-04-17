@@ -1,6 +1,6 @@
 ~/indy-tails-server/docker/manage start
 ~/von-network/manage start
-URL="http://82.165.247.238:9000/register"
+URL="http://localhost:9000/register"
 PAYLOAD1='{
   "role": "ENDORSER",
   "alias": null,
