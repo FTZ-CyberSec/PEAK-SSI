@@ -13,6 +13,9 @@ def connect_agents(receive_port, target):
     elif target == "grid":
         invite_port = 11001
         label = "Grid"
+    else:
+        print("Invalid target")
+        return
     data = {
         "accept": [
             "didcomm/aip1",

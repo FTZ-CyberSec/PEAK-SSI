@@ -13,7 +13,7 @@ for type in vc_types:
 connect_agents(11002, "platform")
 connect_agents(11002, "grid")
 """
-
+"""
 presentation = present_credential("persoCert")
 # extract the values of "raw" for name, adress, and birthdate from present_credential("persoCert")
 if presentation['verified'] == 'true':
@@ -49,3 +49,5 @@ if True:
 else:
     print("persoCert data is not eligible for ownerCert issuance")
 
+"""
+connect_agents(11003, "test")
