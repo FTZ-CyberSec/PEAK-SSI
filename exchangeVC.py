@@ -8,7 +8,7 @@ from config import BASE_URL, platform_DID, grid_DID, vc_types
 
 
 # Function to perform the credential exchange
-def issue_credential(type: vc_types, holder_port=11002):
+def issue_credential(type: vc_types, holder_port: int = 11002):
     id = random.randint(00000, 99999)
     match type:
         case "persoCert":
@@ -167,7 +167,7 @@ def issue_credential(type: vc_types, holder_port=11002):
         # Handle requests exceptions (e.g., network errors, timeouts)
         print(f"Request failed: {e}")
 
-def present_credential(type: vc_types, holder_port=11002):
+def present_credential(type: vc_types, holder_port: int = 11002):
     match type:
         case "persoCert":
             issuer_port = 11000

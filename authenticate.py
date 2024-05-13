@@ -2,7 +2,7 @@ from exchangeVC import *
 from connect import connect_agents
 import time
 
-def new_prosumer(port = 11002):
+def new_prosumer(port: int = 11002):
     step = 0
     while step < 6 or step == 99:
         match step:
