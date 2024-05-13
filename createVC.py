@@ -1,9 +1,9 @@
 import random
 import requests
 import datetime
-from config import platform_DID, grid_DID, BASE_URL
+from config import platform_DID, grid_DID, BASE_URL, vc_types
 
-def create_vc(type, holder_port=11002):
+def create_vc(type: vc_types, holder_port=11002):
     # Define the data for the credential proposal
     match type:
         case "persoCert":

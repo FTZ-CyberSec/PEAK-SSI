@@ -4,11 +4,11 @@ import random
 import datetime
 import time
 from createVC import create_vc
-from config import BASE_URL, platform_DID, grid_DID
+from config import BASE_URL, platform_DID, grid_DID, vc_types
 
 
 # Function to perform the credential exchange
-def issue_credential(type, holder_port=11002):
+def issue_credential(type: vc_types, holder_port=11002):
     id = random.randint(00000, 99999)
     match type:
         case "persoCert":
@@ -167,7 +167,7 @@ def issue_credential(type, holder_port=11002):
         # Handle requests exceptions (e.g., network errors, timeouts)
         print(f"Request failed: {e}")
 
-def present_credential(type, holder_port=11002):
+def present_credential(type: vc_types, holder_port=11002):
     match type:
         case "persoCert":
             issuer_port = 11000
@@ -336,7 +336,7 @@ def present_credential(type, holder_port=11002):
         # Handle requests exceptions (e.g., network errors, timeouts)
         print(f"Request failed: {e}")
 
-def define_credential(type):
+def define_credential(type: vc_types):
     match type:
         case "persoCert":
             issuer_port = 11000
