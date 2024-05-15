@@ -32,7 +32,7 @@ def connect_agents(receive_port: int, target: str):
     }
 
     # Creates and sends invitation from Alice to Bob
-    response = requests.post(f"http://{url}:{invite_port}/out-of-band/create-invitation?auto_accept=true&multi_use=true",
+    response = requests.post(f"http://{url}:{invite_port}/out-of-band/create-invitation?auto_accept=true&multi_use=false",
                              headers=headers, json=data)
 
     if response.status_code == 200:

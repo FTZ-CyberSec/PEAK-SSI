@@ -32,16 +32,17 @@ def new_prosumer(port: int = 11002):
                     print("persoCert could not be verified")
                     step = 99
             case 3:
+                # TODO: Somehow does not work -> for later
                 # Issue ownerCert
-                issue_credential("ownerCert", port)
+                # issue_credential("ownerCert", port)
                 step += 1
             case 4:
                 # Issue assetCert
-                presentation_owner = present_credential("ownerCert", port)
+                # presentation_owner = present_credential("ownerCert", port)
                 presentation_grid = present_credential("gridCert", port)
-                if presentation_owner is not None and presentation_grid is not None and presentation_owner['verified'] == 'true' and presentation_grid['verified'] == 'true':
+                if presentation_grid is not None and presentation_grid['verified'] == 'true':
                     print("ownerCert is verified, here is the data: \n")
-                    print("Lizenznummer: ", presentation_owner['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['lizenznummer']['raw'])
+                    # print("Lizenznummer: ", presentation_owner['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['lizenznummer']['raw'])
                     print("gridCert is verified, here is the data: \n")
                     print("ZaehlerID: ", presentation_grid['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['zaehlerID']['raw'])
                     print("SmartMeterID: ", presentation_grid['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['smartMeterID']['raw'])
@@ -58,9 +59,9 @@ def new_prosumer(port: int = 11002):
                 # Issue warrantCert
                 presentation = present_credential("persoCert", port)
                 presentation_asset = present_credential("assetCert", port)
-                presentation_owner = present_credential("ownerCert", port)
+                # presentation_owner = present_credential("ownerCert", port)
                 presentation_grid = present_credential("gridCert", port)
-                if presentation_asset is not None and presentation_owner is not None and presentation_grid is not None and presentation is not None and presentation_asset['verified'] == 'true' and presentation_owner['verified'] == 'true' and presentation_grid['verified'] == 'true' and presentation['verified'] == 'true':
+                if presentation_asset is not None and presentation_grid is not None and presentation is not None and presentation_asset['verified'] == 'true' and presentation_grid['verified'] == 'true' and presentation['verified'] == 'true':
                     print("assetCert is verified, here is the data: \n")
                     print("AnlagenTyp: ", presentation_asset['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['anlagenTyp']['raw'])
                     print("StellschritteP: ", presentation_asset['by_format']['pres']['indy']['requested_proof']['revealed_attrs']['stellschritteP']['raw'])

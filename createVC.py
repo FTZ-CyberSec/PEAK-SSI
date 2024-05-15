@@ -24,7 +24,7 @@ def create_vc(type: vc_types, holder_port: int = 11002):
             attributes = [{"name": "lizenznummer", "value": f"{random.randint(0, 100000)}"}]
             issuer = platform_DID
             indy = {
-                "cred_def_id": f"{issuer}:3:CL:30:default",
+                "cred_def_id": f"{issuer}:3:CL:18:default",
                 "issuer_did": issuer,
                 "schema_id": f"{issuer}:2:ownerCert:1.0",
                 "schema_issuer_did": issuer,
@@ -43,7 +43,7 @@ def create_vc(type: vc_types, holder_port: int = 11002):
             {"name": "verbrauchpA", "value": f"{random.randint(2000, 9000)}"}]
             issuer = grid_DID
             indy = {
-                "cred_def_id": f"{issuer}:3:CL:18:default",
+                "cred_def_id": f"{issuer}:3:CL:20:default",
                 "issuer_did": issuer,
                 "schema_id": f"{issuer}:2:gridCert:1.0",
                 "schema_issuer_did": issuer,
@@ -60,7 +60,7 @@ def create_vc(type: vc_types, holder_port: int = 11002):
             {"name": "speicherKapa", "value": f"{random.choice([0,random.randint(4000, 16000)])}"}]
             issuer = grid_DID
             indy = {
-                "cred_def_id": f"{issuer}:3:CL:24:default",
+                "cred_def_id": f"{issuer}:3:CL:26:default",
                 "issuer_did": issuer,
                 "schema_id": f"{issuer}:2:assetCert:1.0",
                 "schema_issuer_did": issuer,
@@ -74,7 +74,7 @@ def create_vc(type: vc_types, holder_port: int = 11002):
             {"name": "handelsArt", "value": f"{random.choice(['Flex', 'Energie', 'Beides'])}"}]
             issuer = platform_DID
             indy = {
-                "cred_def_id": f"{issuer}:3:CL:36:default",
+                "cred_def_id": f"{issuer}:3:CL:32:default",
                 "issuer_did": issuer,
                 "schema_id": f"{issuer}:2:warrantCert:1.0",
                 "schema_issuer_did": issuer,

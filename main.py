@@ -15,5 +15,4 @@ connect_agents(11002, "platform")
 connect_agents(11002, "grid")
 """
 # Test with one prosumer -> does not yet work with 11003 prosumer
-new_prosumer(11003)
-
+connect_agents(11003, "platform")

@@ -67,7 +67,6 @@ def issue_credential(type: vc_types, holder_port: int = 11002):
         cred_ex_id_issuer = fetch_record_response.json()['results'][0]['cred_ex_record']['cred_ex_id']
     else:
         return "No credential exchange record found"
-    # TODO: Add control algorithm to check the request
     # Send Offer from Issuer
     try:
         offer_response = requests.post(
@@ -340,27 +339,28 @@ def define_credential(type: vc_types):
     match type:
         case "persoCert":
             issuer_port = 11000
+            issuer_DID = platform_DID
             attributes = ["name", "adress", "birthdate"]
         case "ownerCert":
             issuer_port = 11000
+            issuer_DID = platform_DID
             attributes = ["lizenznummer"]
         case "gridCert":
             issuer_port = 11001
+            issuer_DID = grid_DID
             attributes = ["zaehlerID", "smartMeterID", "marktlokation", "HEMS", "steuerbox", "verbrauchpA"]
         case "assetCert":
             issuer_port = 11001
+            issuer_DID = grid_DID
             attributes = ["anlagenTyp", "stellschritteP", "Pmax", "Pmin", "energieArt", "steuerbarkeit", "speicherKapa"]
         case "warrantCert":
             issuer_port = 11000
+            issuer_DID = platform_DID
             attributes = ["handelsRichtung", "maxEinspeisung", "maxLast", "handelsArt"]
     name = type
 
     # Create Schema
-    schema_data = {
-        "attributes": attributes,
-        "schema_name": name,
-        "schema_version": "1.0"
-    }
+    schema_data = dict(attributes=attributes, schema_name=name, schema_version="1.0")
     response = requests.post(f'http://{BASE_URL}:{issuer_port}/schemas',
                              headers={'accept': 'application/json', 'Content-Type': 'application/json'},
                              data=json.dumps(schema_data))
@@ -370,12 +370,8 @@ def define_credential(type: vc_types):
     seqNo = response.json()["sent"]["schema"]["seqNo"]
     time.sleep(0.1)
     # Create Credential Definition
-    credential_definition_data = {
-        "revocation_registry_size": 10000,
-        "schema_id": f"{BASE_URL}:2:{name}:1.0",
-        "support_revocation": True,
-        "tag": "default"
-    }
+    credential_definition_data = dict(revocation_registry_size=10000, schema_id=f"{issuer_DID}:2:{name}:1.0",
+                                      support_revocation=True, tag="default")
     response = requests.post(f'http://{BASE_URL}:{issuer_port}/credential-definitions',
                              headers={'accept': 'application/json', 'Content-Type': 'application/json'},
                              data=json.dumps(credential_definition_data))
@@ -383,10 +379,7 @@ def define_credential(type: vc_types):
     print("\n")
     time.sleep(0.1)
     # Create Revocation Registry
-    revocation_registry_data = {
-        "credential_definition_id": f"{BASE_URL}:3:CL:{seqNo}:default",
-        "max_cred_num": 10000
-    }
+    revocation_registry_data = dict(credential_definition_id=f"{issuer_DID}:3:CL:{seqNo}:default", max_cred_num=10000)
     response = requests.post(f'http://{BASE_URL}:{issuer_port}/revocation/create-registry',
                              headers={'accept': 'application/json', 'Content-Type': 'application/json'},
                              data=json.dumps(revocation_registry_data))
