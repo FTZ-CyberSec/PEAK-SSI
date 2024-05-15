@@ -2,7 +2,7 @@ import requests
 import json
 from config import BASE_URL as url
 
-def connect_agents(receive_port: int, target: int):
+def connect_agents(receive_port: int, target: str):
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json"
@@ -26,7 +26,7 @@ def connect_agents(receive_port: int, target: int):
             "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/didexchange/1.0"
         ],
         "metadata": {},
-        "my_label": "test1",
+        "my_label": str(receive_port),
         "protocol_version": "1.1",
         "use_public_did": True
     }
