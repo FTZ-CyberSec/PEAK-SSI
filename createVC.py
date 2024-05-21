@@ -5,6 +5,12 @@ from config import platform_DID, grid_DID, BASE_URL, vc_types
 
 def create_vc(type: vc_types, holder_port: int = 11002):
     # Define the data for the credential proposal
+    if holder_port < 11002 or holder_port >= 12000:
+        print("Error: Port number out of range")
+        return 0
+    if type not in vc_types:
+        print("Error: Invalid type")
+        return 0
     match type:
         case "persoCert":
             attributes = [{"name": "name", "value": input("Vor- und Nachname: ")},
@@ -128,7 +134,8 @@ def create_vc(type: vc_types, holder_port: int = 11002):
 def get_latest_platform_connection_id(data, type: str = "platform"):
     latest_entry = None
     latest_timestamp = None
-
+    if type not in ["platform", "grid"]:
+        return None
     for entry in data['results']:
         if type in entry['their_label']:
             updated_at = datetime.datetime.fromisoformat(entry['updated_at'].replace("Z", "+00:00"))

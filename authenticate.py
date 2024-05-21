@@ -4,7 +4,7 @@ import time
 
 def new_prosumer(port: int = 11002):
     step = 0
-    if port < 11000 or port >= 12000:
+    if port < 11002 or port >= 12000:
         print("Error: Port number out of range")
         return 0
     while step < 6 or step == 99:

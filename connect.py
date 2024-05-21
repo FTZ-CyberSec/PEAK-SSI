@@ -3,6 +3,9 @@ import json
 from config import BASE_URL as url
 
 def connect_agents(receive_port: int, target: str):
+    if receive_port < 11002 or receive_port >= 12000:
+        print("Error: Port number out of range")
+        return 0
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json"
@@ -15,7 +18,7 @@ def connect_agents(receive_port: int, target: str):
         label = "Grid"
     else:
         print("Invalid target")
-        return
+        return 0
     data = {
         "accept": [
             "didcomm/aip1",
@@ -58,7 +61,10 @@ def connect_agents(receive_port: int, target: str):
 
         if response2.status_code == 200:
             print(response2.text)
+            return 1
         else:
             print(f"HTTP POST request failed with response code: {response2.status_code}")
+            return 0
     else:
         print("No invitation available to accept.")
+        return 0

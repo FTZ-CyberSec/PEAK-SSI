@@ -9,6 +9,12 @@ from config import BASE_URL, platform_DID, grid_DID, vc_types
 
 # Function to perform the credential exchange
 def issue_credential(type: vc_types, holder_port: int = 11002):
+    if holder_port < 11002 or holder_port >= 12000:
+        print("Error: Port number out of range")
+        return 0
+    if type not in vc_types:
+        print("Error: Invalid type")
+        return 0
     id = random.randint(00000, 99999)
     match type:
         case "persoCert":
@@ -158,6 +164,7 @@ def issue_credential(type: vc_types, holder_port: int = 11002):
             print("Check Credential Response:")
             print(check_credential_response.json())
             print("\n")
+            return 1
         else:
             # Handle responses with error status codes
             print(f"Error fetching credential record: {check_credential_response.status_code}")
@@ -167,6 +174,12 @@ def issue_credential(type: vc_types, holder_port: int = 11002):
         print(f"Request failed: {e}")
 
 def present_credential(type: vc_types, holder_port: int = 11002):
+    if holder_port < 11002 or holder_port >= 12000:
+        print("Error: Port number out of range")
+        return 0
+    if type not in vc_types:
+        print("Error: Invalid type")
+        return 0
     match type:
         case "persoCert":
             issuer_port = 11000
@@ -339,6 +352,9 @@ def present_credential(type: vc_types, holder_port: int = 11002):
         print(f"Request failed: {e}")
 
 def define_credential(type: vc_types):
+    if type not in vc_types:
+        print("Error: Invalid type")
+        return 0
     match type:
         case "persoCert":
             issuer_port = 11000
@@ -387,3 +403,4 @@ def define_credential(type: vc_types):
                              headers={'accept': 'application/json', 'Content-Type': 'application/json'},
                              data=json.dumps(revocation_registry_data))
     print(response.json())
+    return 1
