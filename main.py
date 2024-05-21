@@ -15,5 +15,5 @@ for type in vc_types:
 connect_agents(11002, "platform")
 connect_agents(11002, "grid")
 """
-
+# At the moment, there are 8 prosumers from port 11002 to 11009
 new_prosumer(11007)
