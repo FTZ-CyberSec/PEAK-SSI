@@ -88,11 +88,13 @@ def create_vc(type: vc_types, holder_port: int = 11002):
     # Important for fetching the right connection_id
     if issuer == platform_DID:
         which = platform_DID
+        conn_input = "platform"
     elif issuer == grid_DID:
         which = grid_DID
+        conn_input = "grid"
     # Inserts the generated data into the credential proposal
     connections = requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active').json()
-    connection_id = get_latest_platform_connection_id(connections)
+    connection_id = get_latest_platform_connection_id(connections, conn_input)
     credential_proposal_data = {
         "auto_remove": False,
         "comment": "Please give me permission to trade",
