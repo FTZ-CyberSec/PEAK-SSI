@@ -3,7 +3,7 @@ import json
 import random
 import datetime
 import time
-from createVC import create_vc
+from createVC import create_vc, get_latest_platform_connection_id
 from config import BASE_URL, platform_DID, grid_DID, vc_types
 
 
@@ -193,15 +193,23 @@ def present_credential(type: vc_types, holder_port: int = 11002):
     for attribute in vc:
         attributes[attribute] = {"name": attribute, "non_revoked": {"to": current_timestamp}}
     # Fetch the connection ID of the verifier agent
-    invitation_key = requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_public_did={which}').json()['results'][0].get(
-        'invitation_key')
+    connections = requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active').json()
+    print("Connections: ", connections)
+    if which == platform_DID:
+        holder_conn_id = get_latest_platform_connection_id(connections, "platform")
+    elif which == grid_DID:
+        holder_conn_id = get_latest_platform_connection_id(connections, "grid")
+    print("Holder_Conn_ID: ", holder_conn_id)
+    invitation_key = requests.get(f'http://{BASE_URL}:{holder_port}/connections/{holder_conn_id}').json()['invitation_key']
+    print("Invitation Key: ", invitation_key)
     params = {
         'invitation_key': invitation_key,
         'state': 'active'
     }
     time.sleep(0.1)
-    verifier_connection_id = \
-        requests.get(f"http://{BASE_URL}:{issuer_port}/connections", params=params).json()['results'][0]['connection_id']
+    print(requests.get(f"http://{BASE_URL}:{issuer_port}/connections", params=params).json())
+    verifier_connection_id = requests.get(f"http://{BASE_URL}:{issuer_port}/connections", params=params).json()['results'][0]['connection_id']
+
     url = f'http://{BASE_URL}:{issuer_port}/present-proof-2.0/send-request'
     headers = {
         'accept': 'application/json',

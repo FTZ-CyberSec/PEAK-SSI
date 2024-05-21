@@ -91,11 +91,12 @@ def create_vc(type: vc_types, holder_port: int = 11002):
     elif issuer == grid_DID:
         which = grid_DID
     # Inserts the generated data into the credential proposal
+    connections = requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active').json()
+    connection_id = get_latest_platform_connection_id(connections)
     credential_proposal_data = {
         "auto_remove": False,
         "comment": "Please give me permission to trade",
-        "connection_id": requests.get(f'http://{BASE_URL}:{holder_port}/connections?state=active&their_public_did={which}').json()['results'][0].get(
-            'connection_id'),
+        "connection_id": connection_id,
         "credential_preview": {
             "@type": "issue-credential/2.0/credential-preview",
             "attributes": attributes
@@ -120,3 +121,19 @@ def create_vc(type: vc_types, holder_port: int = 11002):
         "trace": True
     }
     return credential_proposal_data
+
+
+def get_latest_platform_connection_id(data, type: str = "platform"):
+    latest_entry = None
+    latest_timestamp = None
+
+    for entry in data['results']:
+        if type in entry['their_label']:
+            updated_at = datetime.datetime.fromisoformat(entry['updated_at'].replace("Z", "+00:00"))
+            if latest_timestamp is None or updated_at > latest_timestamp:
+                latest_timestamp = updated_at
+                latest_entry = entry
+
+    if latest_entry:
+        return latest_entry['connection_id']
+    return None

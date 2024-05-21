@@ -26,9 +26,9 @@ def connect_agents(receive_port: int, target: str):
             "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/didexchange/1.0"
         ],
         "metadata": {},
-        "my_label": str(receive_port),
+        "my_label": f"{target} {receive_port}",
         "protocol_version": "1.1",
-        "use_public_did": True
+        "use_public_did": False
     }
 
     # Creates and sends invitation from Alice to Bob
@@ -53,7 +53,7 @@ def connect_agents(receive_port: int, target: str):
     if invitation is not None:
         # Accepts the Invitation, Connection is established if successful
         response2 = requests.post(
-            f"http://{url}:{receive_port}/out-of-band/receive-invitation?auto_accept=true&use_existing_connection=true",
+            f"http://{url}:{receive_port}/out-of-band/receive-invitation?auto_accept=true&use_existing_connection=false",
             headers=headers, json=invitation)
 
         if response2.status_code == 200:

@@ -2,6 +2,7 @@ from connect import connect_agents
 from config import *
 from exchangeVC import *
 from authenticate import new_prosumer
+from delete_connections import delete_all_connections
 
 # Run on first startup of SSI Network
 """
@@ -15,4 +16,6 @@ connect_agents(11002, "platform")
 connect_agents(11002, "grid")
 """
 # Test with one prosumer -> does not yet work with 11003 prosumer
-connect_agents(11003, "platform")
+"""delete_all_connections(11002)
+delete_all_connections(11003)"""
+new_prosumer(11003)
